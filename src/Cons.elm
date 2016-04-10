@@ -21,7 +21,7 @@ fromList : List a -> Maybe (Cons a)
 fromList l =
   case l of
     [] -> Nothing
-    head::tail -> Just <| Cons head tail
+    head::tail -> Just <| cons head tail
 
 toList : Cons a -> List a
 toList (Cons head tail) = head::tail
@@ -70,30 +70,30 @@ intersperse : a -> Cons a -> Cons a
 intersperse x c =
   case tail' c of
     Nothing -> c
-    Just tail -> Cons head <| Cons x <| intersperse x tail
+    Just tail -> cons head <| cons x <| intersperse x tail
 
 unzip : Cons (a, b) -> (Cons a, Cons b)
 unzip = foldr1 cons2'
 
 map : (a -> b) -> Cons a -> Cons b
-map f (Cons head tail) = Cons (f head) (List.map f tail)
+map f (Cons head tail) = cons (f head) (List.map f tail)
 
 map2 : (a -> b -> c) -> Cons a -> Cons b -> Cons c
-map2 f (Cons x xs) (Cons y ys) = Cons (f x y) (List.map2 f xs ys)
+map2 f (Cons x xs) (Cons y ys) = cons (f x y) (List.map2 f xs ys)
 
 map3 : (a -> b -> c -> d) -> Cons a -> Cons b -> Cons c -> Cons d
-map3 f (Cons x xs) (Cons y ys) (Cons z zs) = Cons (f x y z) (List.map3 f xs ys zs)
+map3 f (Cons x xs) (Cons y ys) (Cons z zs) = cons (f x y z) (List.map3 f xs ys zs)
 
 map4 : (a -> b -> c -> d -> e) -> Cons a -> Cons b -> Cons c -> Cons d -> Cons e
-map4 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) = Cons (f v w x y) (List.map3 f vs ws xs ys)
+map4 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) = cons (f v w x y) (List.map3 f vs ws xs ys)
 
 map5 : (a -> b -> c -> d -> e -> f) -> Cons a -> Cons b -> Cons c -> Cons d -> Cons e -> Cons f
-map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) = Cons (f v w x y z) (List.map3 f vs ws xs ys zs)
+map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) = cons (f v w x y z) (List.map3 f vs ws xs ys zs)
 
 indexedMap : (Int -> a -> b) -> Cons a -> Cons b
 indexedMap f c =
   let
-    go i (Cons head tail) = Cons <| f i head <| go (i + 1) tail
+    go i (Cons head tail) = cons <| f i head <| go (i + 1) tail
   in
     go 0 c
 
