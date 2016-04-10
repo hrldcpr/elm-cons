@@ -1,4 +1,16 @@
-module Cons where
+module Cons
+  ( cons, fromList, toList
+  , tail', cons', foldr1, foldl1
+  , isEmpty, length, reverse, member
+  , head, tail, filter, take, drop
+  , append, concat, intersperse
+  , partition, unzip
+  , map, map2, map3, map4, map5
+  , filterMap, concatMap, indexedMap
+  , foldr, foldl
+  , sum, product, maximum, minimum, all, any, scanl
+  , sort, sortBy, sortWith
+  ) where
 
 import List
 
@@ -6,16 +18,16 @@ import List
 type Cons a = Cons a (List a)
 
 
--- Contructor and accessors
+-- Constructor and accessors
 
 cons : a -> List a -> Cons a
 cons = Cons
 
+-- head
+-- tail
+
 
 -- Convenience functions
-
-singleton : a -> Cons a
-singleton x = Cons x []
 
 fromList : List a -> Maybe (Cons a)
 fromList l =
@@ -32,8 +44,14 @@ tail' = tail >> fromList
 cons' : a -> Cons a -> Cons a
 cons' x = toList >> cons x
 
-cons2' : (a, b) -> (Cons a, Cons b) -> (Cons a, Cons b)
-cons2' (x, y) (xs, ys) = (cons' x xs, cons' y ys)
+foldr1 : (a -> a -> a) -> Cons a -> a
+foldr1 f c =
+  case tail' c of
+    Nothing -> head c
+    Just tail -> f (head c) (foldr1 tail)
+
+foldl1 : (a -> a -> a) -> Cons a -> a
+foldl1 f (Cons head tail) = List.foldl f head tail
 
 
 -- List methods that avoid Maybe
@@ -73,7 +91,11 @@ intersperse x c =
     Just tail -> cons head <| cons x <| intersperse x tail
 
 unzip : Cons (a, b) -> (Cons a, Cons b)
-unzip = foldr1 cons2'
+unzip =
+  let
+    step (x, y) (xs, ys) = (cons' x xs, cons' y ys)
+  in
+    foldr1 step
 
 map : (a -> b) -> Cons a -> Cons b
 map f (Cons head tail) = cons (f head) (List.map f tail)
@@ -97,18 +119,8 @@ indexedMap f c =
   in
     go 0 c
 
-foldr1 : (a -> a -> a) -> Cons a -> a
-foldr1 f c =
-  case tail' c of
-    Nothing -> head c
-    Just tail -> f (head c) (foldr1 tail)
-
-foldl1 : (a -> a -> a) -> Cons a -> a
-foldl1 f (Cons head tail) = List.foldl f head tail
-
-
 scanl : (a -> b -> b) -> b -> Cons a -> Cons b
-scanl =
+scanl = -- TODO
 --scanl1
 
 
