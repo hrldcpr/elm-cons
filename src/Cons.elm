@@ -1,5 +1,5 @@
 module Cons
-  ( cons, fromList, toList
+  ( Cons, cons, fromList, toList
   , tail', cons', foldr1, foldl1
   , isEmpty, length, reverse, member
   , head, tail, filter, take, drop

@@ -8,13 +8,22 @@ import Cons exposing (..)
 import List
 
 
-checkSuite =
-  suite "elm-check tests"
-  [ claim "cons increases list length by 1"
-  `that` (\ (x, xs) -> cons x xs |> length)
-  `is` (\ (x, xs) -> 1 + List.length xs)
-  `for` tuple (int, list int)
-  ]
-
 all =
   quickCheck checkSuite |> Check.Test.evidenceToTest
+
+checkSuite =
+  suite "elm-check tests"
+  [ claim "length is 1 more than length of tail"
+  `that` length
+  `is` (tail >> List.length >> (+) 1)
+  `for` cons int
+  ]
+
+cons : Producer a -> Producer (Cons a)
+cons x =
+  let
+    toCons = uncurry Cons.cons
+    fromCons c = (head c, tail c)
+    headAndTail = tuple (x, list x)
+  in
+    convert toCons fromCons headAndTail
