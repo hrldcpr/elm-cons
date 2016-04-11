@@ -29,6 +29,9 @@ cons = Cons
 
 -- Convenience functions
 
+singleton : a -> Cons a
+singleton x = cons x []
+
 fromList : List a -> Maybe (Cons a)
 fromList l =
   case l of
@@ -48,7 +51,7 @@ foldr1 : (a -> a -> a) -> Cons a -> a
 foldr1 f c =
   case tail' c of
     Nothing -> head c
-    Just tail -> f (head c) (foldr1 tail)
+    Just tail -> f (head c) (foldr1 f tail)
 
 foldl1 : (a -> a -> a) -> Cons a -> a
 foldl1 f (Cons head tail) = List.foldl f head tail
@@ -62,22 +65,25 @@ head (Cons head _) = head
 tail : Cons a -> List a
 tail (Cons _ tail) = tail
 
-maximum : Cons number -> number
+maximum : Cons comparable -> comparable
 maximum = foldl1 max
 
-minimum : Cons number -> number
+minimum : Cons comparable -> comparable
 minimum = foldl1 min
 
 
 -- List methods that maintain Cons
 
 reverse : Cons a -> Cons a
-reverse = foldl1 cons'
+reverse c =
+  case tail' c of
+    Nothing -> c
+    Just tail -> append (reverse tail) (singleton <| head c)
 
 --(::) = cons
 
 append : Cons a -> Cons a -> Cons a
-append c d = foldr cons d c
+append c d = foldr cons' d c
 --append' : List a -> Cons a -> Cons a
 --append'' : Cons a -> List a -> Cons a
 
@@ -88,14 +94,14 @@ intersperse : a -> Cons a -> Cons a
 intersperse x c =
   case tail' c of
     Nothing -> c
-    Just tail -> cons head <| cons x <| intersperse x tail
+    Just tail -> cons' (head c) <| cons' x <| intersperse x tail
 
 unzip : Cons (a, b) -> (Cons a, Cons b)
-unzip =
+unzip (Cons (x, y) tail) =
   let
-    step (x, y) (xs, ys) = (cons' x xs, cons' y ys)
+    (xs, ys) = List.unzip tail
   in
-    foldr1 step
+    (cons x xs, cons y ys)
 
 map : (a -> b) -> Cons a -> Cons b
 map f (Cons head tail) = cons (f head) (List.map f tail)
@@ -107,15 +113,18 @@ map3 : (a -> b -> c -> d) -> Cons a -> Cons b -> Cons c -> Cons d
 map3 f (Cons x xs) (Cons y ys) (Cons z zs) = cons (f x y z) (List.map3 f xs ys zs)
 
 map4 : (a -> b -> c -> d -> e) -> Cons a -> Cons b -> Cons c -> Cons d -> Cons e
-map4 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) = cons (f v w x y) (List.map3 f vs ws xs ys)
+map4 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) = cons (f v w x y) (List.map4 f vs ws xs ys)
 
 map5 : (a -> b -> c -> d -> e -> f) -> Cons a -> Cons b -> Cons c -> Cons d -> Cons e -> Cons f
-map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) = cons (f v w x y z) (List.map3 f vs ws xs ys zs)
+map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) = cons (f v w x y z) (List.map5 f vs ws xs ys zs)
 
 indexedMap : (Int -> a -> b) -> Cons a -> Cons b
 indexedMap f c =
   let
-    go i (Cons head tail) = cons <| f i head <| go (i + 1) tail
+    go i (Cons head _) =
+      case tail' c of
+        Nothing -> singleton <| f i head
+        Just tail -> cons' (f i head) <| go (i + 1) tail
   in
     go 0 c
 
@@ -139,8 +148,8 @@ foldr f x = toList >> List.foldr f x
 foldl f x = toList >> List.foldl f x
 sum = toList >> List.sum
 product = toList >> List.product
-all = toList >> List.all
-any = toList >> List.any
+all f = toList >> List.all f
+any f = toList >> List.any f
 sort = toList >> List.sort
 sortBy f = toList >> List.sortBy f
 sortWith f = toList >> List.sortWith f
