@@ -1,6 +1,7 @@
 module Cons
-  ( Cons, cons, fromList, toList
-  , tail', cons', foldr1, foldl1
+  ( Cons, cons, singleton, toList
+  , fromList, toList', cons', tail'
+  , foldr1, foldl1
   , isEmpty, length, reverse, member
   , head, tail, filter, take, drop
   , append, concat, intersperse
@@ -32,20 +33,8 @@ cons = Cons
 singleton : a -> Cons a
 singleton x = cons x []
 
-fromList : List a -> Maybe (Cons a)
-fromList l =
-  case l of
-    [] -> Nothing
-    head::tail -> Just <| cons head tail
-
 toList : Cons a -> List a
 toList (Cons head tail) = head::tail
-
-tail' : Cons a -> Maybe (Cons a)
-tail' = tail >> fromList
-
-cons' : a -> Cons a -> Cons a
-cons' x = toList >> cons x
 
 foldr1 : (a -> a -> a) -> Cons a -> a
 foldr1 f c =
@@ -56,8 +45,28 @@ foldr1 f c =
 foldl1 : (a -> a -> a) -> Cons a -> a
 foldl1 f (Cons head tail) = List.foldl f head tail
 
+--scanl1
 
--- List methods that avoid Maybe
+
+-- Maybe functions
+
+fromList : List a -> Maybe (Cons a)
+fromList l =
+  case l of
+    [] -> Nothing
+    head::tail -> Just <| cons head tail
+
+toList' : Maybe (Cons a) -> List a
+toList' = Maybe.map toList >> Maybe.withDefault []
+
+tail' : Cons a -> Maybe (Cons a)
+tail' = tail >> fromList
+
+cons' : a -> Maybe (Cons a) -> Cons a
+cons' head tail = cons head <| toList' tail
+
+
+-- List functions that avoid Maybe
 
 head : Cons a -> a
 head (Cons head _) = head
@@ -72,7 +81,7 @@ minimum : Cons comparable -> comparable
 minimum = foldl1 min
 
 
--- List methods that maintain Cons
+-- List functions that preserve non-emptiness
 
 reverse : Cons a -> Cons a
 reverse c =
@@ -83,18 +92,29 @@ reverse c =
 --(::) = cons
 
 append : Cons a -> Cons a -> Cons a
-append c d = foldr cons' d c
---append' : List a -> Cons a -> Cons a
---append'' : Cons a -> List a -> Cons a
+append c d =
+  let
+    step x xs = cons x <| toList xs
+  in
+    foldr step d c
+
+appendToList : List a -> Cons a -> Cons a
+appendToList = fromList >> Maybe.map append >> Maybe.withDefault identity
+
+appendList : Cons a -> List a -> Cons a
+appendList c l =
+  case fromList l of
+    Nothing -> c
+    Just d -> append c d
 
 concat : Cons (Cons a) -> Cons a
 concat = foldl1 append
 
 intersperse : a -> Cons a -> Cons a
 intersperse x c =
-  case tail' c of
-    Nothing -> c
-    Just tail -> cons' (head c) <| cons' x <| intersperse x tail
+  case tail c of
+    [] -> c
+    tail -> cons (head c) <| x :: List.intersperse x tail
 
 unzip : Cons (a, b) -> (Cons a, Cons b)
 unzip (Cons (x, y) tail) =
@@ -121,10 +141,7 @@ map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) = cons (f v w
 indexedMap : (Int -> a -> b) -> Cons a -> Cons b
 indexedMap f c =
   let
-    go i (Cons head _) =
-      case tail' c of
-        Nothing -> singleton <| f i head
-        Just tail -> cons' (f i head) <| go (i + 1) tail
+    go i c = cons' (f i <| head c) <| Maybe.map (go (i + 1)) <| tail' c
   in
     go 0 c
 
