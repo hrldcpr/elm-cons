@@ -51,9 +51,4 @@ checkSuite =
 
 cons : Producer a -> Producer (Cons a)
 cons x =
-  let
-    toCons = uncurry Cons.cons
-    fromCons c = (head c, tail c)
-    headAndTail = tuple (x, list x)
-  in
-    convert toCons fromCons headAndTail
+  convert (uncurry Cons.cons) uncons <| tuple (x, list x)

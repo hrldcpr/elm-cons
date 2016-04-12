@@ -1,7 +1,7 @@
 module Cons
-  ( Cons, cons, singleton, toList
-  , fromList, toList', cons', tail'
-  , foldr1, foldl1
+  ( Cons, cons, uncons
+  , singleton, toList, foldr1, foldl1
+  , fromList, toList', cons', uncons', tail'
   , isEmpty, length, reverse, member
   , head, tail, filter, take, drop
   , append, concat, intersperse
@@ -19,13 +19,13 @@ import List
 type Cons a = Cons a (List a)
 
 
--- Constructor and accessors
+-- Constructor and deconstructor
 
 cons : a -> List a -> Cons a
 cons = Cons
 
--- head
--- tail
+uncons : Cons a -> (a, List a)
+uncons (Cons head tail) = (head, tail)
 
 
 -- Convenience functions
@@ -38,9 +38,9 @@ toList (Cons head tail) = head::tail
 
 foldr1 : (a -> a -> a) -> Cons a -> a
 foldr1 f c =
-  case tail' c of
-    Nothing -> head c
-    Just tail -> f (head c) <| foldr1 f tail
+  case uncons' c of
+    (head, Nothing) -> head
+    (head, Just tail) -> f head <| foldr1 f tail
 
 foldl1 : (a -> a -> a) -> Cons a -> a
 foldl1 f (Cons head tail) = List.foldl f head tail
@@ -64,6 +64,9 @@ tail' = tail >> fromList
 
 cons' : a -> Maybe (Cons a) -> Cons a
 cons' head tail = cons head <| toList' tail
+
+uncons' : Cons a -> (a, Maybe (Cons a))
+uncons' (Cons head tail) = (head, fromList tail)
 
 
 -- List functions that avoid Maybe
@@ -110,9 +113,9 @@ concat = foldl1 append
 
 intersperse : a -> Cons a -> Cons a
 intersperse x c =
-  case tail c of
-    [] -> c
-    tail -> cons (head c) <| x :: List.intersperse x tail
+  case uncons c of
+    (head, []) -> c
+    (head, tail) -> cons head <| x :: List.intersperse x tail
 
 unzip : Cons (a, b) -> (Cons a, Cons b)
 unzip (Cons (x, y) tail) =
