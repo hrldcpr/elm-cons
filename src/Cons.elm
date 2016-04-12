@@ -40,7 +40,7 @@ foldr1 : (a -> a -> a) -> Cons a -> a
 foldr1 f c =
   case tail' c of
     Nothing -> head c
-    Just tail -> f (head c) (foldr1 f tail)
+    Just tail -> f (head c) <| foldr1 f tail
 
 foldl1 : (a -> a -> a) -> Cons a -> a
 foldl1 f (Cons head tail) = List.foldl f head tail
@@ -122,19 +122,19 @@ unzip (Cons (x, y) tail) =
     (cons x xs, cons y ys)
 
 map : (a -> b) -> Cons a -> Cons b
-map f (Cons head tail) = cons (f head) (List.map f tail)
+map f (Cons head tail) = cons (f head) <| List.map f tail
 
 map2 : (a -> b -> c) -> Cons a -> Cons b -> Cons c
-map2 f (Cons x xs) (Cons y ys) = cons (f x y) (List.map2 f xs ys)
+map2 f (Cons x xs) (Cons y ys) = cons (f x y) <| List.map2 f xs ys
 
 map3 : (a -> b -> c -> d) -> Cons a -> Cons b -> Cons c -> Cons d
-map3 f (Cons x xs) (Cons y ys) (Cons z zs) = cons (f x y z) (List.map3 f xs ys zs)
+map3 f (Cons x xs) (Cons y ys) (Cons z zs) = cons (f x y z) <| List.map3 f xs ys zs
 
 map4 : (a -> b -> c -> d -> e) -> Cons a -> Cons b -> Cons c -> Cons d -> Cons e
-map4 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) = cons (f v w x y) (List.map4 f vs ws xs ys)
+map4 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) = cons (f v w x y) <| List.map4 f vs ws xs ys
 
 map5 : (a -> b -> c -> d -> e -> f) -> Cons a -> Cons b -> Cons c -> Cons d -> Cons e -> Cons f
-map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) = cons (f v w x y z) (List.map5 f vs ws xs ys zs)
+map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) = cons (f v w x y z) <| List.map5 f vs ws xs ys zs
 
 indexedMap : (Int -> a -> b) -> Cons a -> Cons b
 indexedMap f c =
