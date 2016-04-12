@@ -84,10 +84,8 @@ minimum = foldl1 min
 -- List functions that preserve non-emptiness
 
 reverse : Cons a -> Cons a
-reverse c =
-  case tail' c of
-    Nothing -> c
-    Just tail -> append (reverse tail) (singleton <| head c)
+reverse (Cons head tail) =
+  appendToList (List.reverse tail) <| singleton head
 
 --(::) = cons
 
