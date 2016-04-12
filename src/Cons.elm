@@ -101,7 +101,8 @@ appendList c l =
     Just d -> append c d
 
 concat : Cons (Cons a) -> Cons a
-concat = foldl1 append
+concat (Cons head tail) =
+  appendList head <| List.concatMap toList tail
 
 intersperse : a -> Cons a -> Cons a
 intersperse x c =
