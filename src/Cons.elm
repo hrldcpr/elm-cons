@@ -1,17 +1,4 @@
-module Cons
-  ( Cons, cons, uncons
-  , singleton, toList, foldr1, foldl1
-  , fromList, toList', cons', uncons', tail'
-  , isEmpty, length, reverse, member
-  , head, tail, filter, take, drop
-  , append, concat, intersperse
-  , partition, unzip
-  , map, map2, map3, map4, map5
-  , filterMap, concatMap, indexedMap
-  , foldr, foldl
-  , sum, product, maximum, minimum, all, any, scanl
-  , sort, sortBy, sortWith
-  ) where
+module Cons (..) where
 
 import List
 
@@ -45,7 +32,14 @@ foldr1 f c =
 foldl1 : (a -> a -> a) -> Cons a -> a
 foldl1 f (Cons head tail) = List.foldl f head tail
 
---scanl1
+scanl1 : (a -> a -> a) -> Cons a -> Cons a
+scanl1 f (Cons head tail) = scanlList f head tail
+
+scanlList : (a -> b -> b) -> b -> List a -> Cons b
+scanlList f x l =
+  cons x <| case l of
+              [] -> []
+              head::tail -> List.scanl f (f head x) tail
 
 
 -- Maybe functions
@@ -89,8 +83,6 @@ minimum = foldl1 min
 reverse : Cons a -> Cons a
 reverse (Cons head tail) =
   appendToList (List.reverse tail) <| singleton head
-
---(::) = cons
 
 append : Cons a -> Cons a -> Cons a
 append c d =
@@ -147,8 +139,7 @@ indexedMap f c =
     go 0 c
 
 scanl : (a -> b -> b) -> b -> Cons a -> Cons b
-scanl = -- TODO
---scanl1
+scanl f x c = scanlList f x <| toList c
 
 
 -- List methods
