@@ -1,16 +1,58 @@
-module Cons (..) where
+module Cons (Cons, cons, uncons, head, tail) where --(..) where
+
+{-| This library provides a type for non-empty lists, called `Cons`.
+
+Being able to encode non-emptiness in the type system can lead to simpler, clearer code. For example, to find the largest element in a List, you have to account for the empty list, which complicates things:
+
+    maximum : List comparable -> Maybe comparable
+    maximum l =
+      case l of
+        [] -> Nothing
+        first::rest -> Just <| List.foldl max first rest
+
+With Cons, on the other hand, the type system knows the list will never be empty, leading to much simpler code:
+
+    maximum : Cons comparable -> comparable
+    maximum = foldl1 max
+
+Every function in the List package has been implemented for Cons, using the native List implementation whenever possible, for performance. And as illustrated above, all List functions that use Maybe--List.head, List.tail, List.maximum, and List.minimum--need no Maybe in their Cons equivalents.
+
+# Basics
+@docs Cons, cons, uncons, head, tail
+
+# Improved List Functions
+
+
+-}
 
 import List
 
 
+{-| A non-empty list of elements of type `a`.
+-}
 type Cons a = Cons a (List a)
 
 
 -- Constructor and deconstructor
 
+{-| Construct a Cons with a given head and tail.
+
+    c = cons 1 [2, 3]
+    head c == 1
+    tail c == [2, 3]
+
+-}
 cons : a -> List a -> Cons a
 cons = Cons
 
+{-| Destructure a Cons into its head and tail. This is useful for pattern matching and for avoiding repeated calls to [head](#head) and [tail](#tail).
+
+    maximum : Cons comparable -> comparable
+    maximum c =
+      case uncons c of
+        (first, rest) -> List.foldl max first rest
+
+-}
 uncons : Cons a -> (a, List a)
 uncons (Cons head tail) = (head, tail)
 
@@ -50,6 +92,9 @@ fromList l =
     [] -> Nothing
     head::tail -> Just <| cons head tail
 
+forList : (Cons a -> b) -> List a -> Maybe b
+forList f = fromList >> Maybe.map f
+
 toList' : Maybe (Cons a) -> List a
 toList' = Maybe.map toList >> Maybe.withDefault []
 
@@ -65,9 +110,19 @@ uncons' (Cons head tail) = (head, fromList tail)
 
 -- List functions that avoid Maybe
 
+{-| The first element of the Cons.
+
+    c = cons 1 [2, 3]
+    head c == 1
+-}
 head : Cons a -> a
 head (Cons head _) = head
 
+{-| The list of all elements after the first element of the Cons.
+
+    c = cons 1 [2, 3]
+    tail c == [2, 3]
+-}
 tail : Cons a -> List a
 tail (Cons _ tail) = tail
 
