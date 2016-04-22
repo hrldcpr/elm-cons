@@ -317,6 +317,24 @@ scanlList f x l =
               [] -> []
               head::tail -> List.scanl f (f head x) tail
 
+sort = sortWith compare
+
+sortBy f = sortWith (\x y -> compare (f x) (f y))
+
+sortWith f c = _insortWith f (head c) <| List.sortWith f <| tail c
+
+-- insert a value into a sorted list
+_insortWith : (a -> a -> Order) -> a -> List a -> Cons a
+_insortWith f x l =
+  case l of
+    [] ->
+      singleton x
+    head::tail ->
+      if f x head == GT then
+        cons head <| toList <| _insortWith f x tail
+      else
+        cons x l
+
 
 -- All Other List Functions
 
@@ -335,6 +353,3 @@ sum = toList >> List.sum
 product = toList >> List.product
 all f = toList >> List.all f
 any f = toList >> List.any f
-sort = toList >> List.sort
-sortBy f = toList >> List.sortBy f
-sortWith f = toList >> List.sortWith f
