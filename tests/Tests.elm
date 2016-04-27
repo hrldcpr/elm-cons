@@ -13,7 +13,10 @@ all =
 
 checkSuite =
   suite "elm-check tests"
-  [ claim "cons agrees with ::"
+  [
+  -- Basics
+
+    claim "cons agrees with ::"
   `that` (uncurry Cons.cons >> toList)
   `is` (uncurry (::))
   `for` tuple (int, list int)
@@ -38,35 +41,8 @@ checkSuite =
   `is` (toList' << Just)
   `for` cons int
 
-  , claim "fromList is inverse of toList'"
-  `that` (fromList << toList')
-  `is` identity
-  `for` maybe (cons int)
 
-  , claim "toList' is inverse of fromList"
-  `that` (toList' << fromList)
-  `is` identity
-  `for` list int
-
-  , claim "tail' agrees with tail"
-  `that` tail'
-  `is` (tail >> fromList)
-  `for` cons int
-
-  , claim "cons' is inverse of uncons'"
-  `that` (uncurry cons' << uncons')
-  `is` identity
-  `for` cons int
-
-  , claim "uncons' is inverse of cons'"
-  `that` (uncons' << uncurry cons')
-  `is` identity
-  `for` tuple (int, maybe (cons int))
-
-  , claim "length agrees with List.length"
-  `that` length
-  `is` (List.length << toList)
-  `for` cons int
+  -- Avoiding Maybe
 
   , claim "head agrees with List.head"
   `that` (head >> Just)
@@ -78,15 +54,69 @@ checkSuite =
   `is` (List.tail << toList)
   `for` cons int
 
+  , claim "minimum agrees with List.minimum"
+  `that` (minimum >> Just)
+  `is` (List.minimum << toList)
+  `for` cons int
+
   , claim "maximum agrees with List.maximum"
   `that` (maximum >> Just)
   `is` (List.maximum << toList)
   `for` cons int
 
-  , claim "minimum agrees with List.minimum"
-  `that` (minimum >> Just)
-  `is` (List.minimum << toList)
+
+  -- Convenient Folds
+
+  , claim "foldl1 agrees with List.foldl"
+  `that` (uncurry foldl1)
+  `is` (\(f, c) -> List.foldl f (head c) <| tail c)
+  `for` tuple (func2 string, cons string)
+
+  , claim "foldr1 is the reverse of foldl1"
+  `that` (uncurry foldr1)
+  `is` (\(f, c) -> foldl1 f <| reverse c)
+  `for` tuple (func2 string, cons string)
+
+  , claim "scanl1 agrees with scanlList"
+  `that` (uncurry scanl1)
+  `is` (\(f, c) -> scanlList f (head c) <| tail c)
+  `for` tuple (func2 string, cons string)
+
+
+  -- List May Be Cons
+
+  , claim "fromList is inverse of toList'"
+  `that` (fromList << toList')
+  `is` identity
+  `for` maybe (cons int)
+
+  , claim "cons' is inverse of uncons'"
+  `that` (uncurry cons' << uncons')
+  `is` identity
   `for` cons int
+
+  , claim "uncons' is inverse of cons'"
+  `that` (uncons' << uncurry cons')
+  `is` identity
+  `for` tuple (int, maybe (cons int))
+
+  , claim "tail' agrees with tail"
+  `that` tail'
+  `is` (tail >> fromList)
+  `for` cons int
+
+  , claim "toList' is inverse of fromList"
+  `that` (toList' << fromList)
+  `is` identity
+  `for` list int
+
+  , claim "forList turns head, tail, minimum, and maximum into their List equivalents"
+  `that` (\l -> (forList head l, forList tail l, forList minimum l, forList maximum l))
+  `is` (\l -> (List.head l, List.tail l, List.minimum l, List.maximum l))
+  `for` list int
+
+
+  -- Preserving Non-Emptiness
 
   , claim "reverse agrees with List.reverse"
   `that` (reverse >> toList)
@@ -98,15 +128,15 @@ checkSuite =
   `is` (\(c, d) -> List.append (toList c) <| toList d)
   `for` tuple (cons int, cons int)
 
-  , claim "appendToList agrees with List.append"
-  `that` (uncurry appendToList >> toList)
-  `is` (\(l, d) -> List.append l <| toList d)
-  `for` tuple (list int, cons int)
-
   , claim "appendList agrees with List.append"
   `that` (uncurry appendList >> toList)
   `is` (\(c, l) -> List.append (toList c) l)
   `for` tuple (cons int, list int)
+
+  , claim "appendToList agrees with List.append"
+  `that` (uncurry appendToList >> toList)
+  `is` (\(l, d) -> List.append l <| toList d)
+  `for` tuple (list int, cons int)
 
   , claim "concat agrees with List.concat"
   `that` (concat >> toList)
@@ -148,18 +178,58 @@ checkSuite =
   `is` (\(f, (a, b, c, d, e)) -> List.map5 f (toList a) (toList b) (toList c) (toList d) (toList e))
   `for` tuple (func5 string, tuple5 (cons int, cons float, cons bool, cons string, cons percentage))
 
+  , claim "concatMap agrees with List.concatMap"
+  `that` (uncurry concatMap >> toList)
+  `is` (\(f, c) -> List.concatMap (f >> toList) <| toList c)
+  `for` tuple (func <| cons string, cons float)
+
   , claim "indexedMap agrees with List.indexedMap"
   `that` (uncurry indexedMap >> toList)
   `is` (\(f, c) -> List.indexedMap f <| toList c)
   `for` tuple (func2 string, cons float)
 
-  , claim "scanl agrees with List.scanl"
-  `that` (\(f, x, c) -> scanl f x c |> toList)
-  `is` (\(f, x, c) -> List.scanl f x <| toList c)
+  , claim "scanl agrees with scanlList"
+  `that` (\(f, x, c) -> scanl f x c)
+  `is` (\(f, x, c) -> scanlList f x <| toList c)
   `for` tuple3 (func2 string, string, cons float)
+
+  , claim "scanlList agrees with List.scanl"
+  `that` (\(f, x, l) -> scanlList f x l |> toList)
+  `is` (\(f, x, l) -> List.scanl f x l)
+  `for` tuple3 (func2 string, string, list float)
+
+  , claim "sort agrees with List.sort"
+  `that` (sort >> toList)
+  `is` (List.sort << toList)
+  `for` cons int
+
+  , claim "sortBy agrees with List.sortBy"
+  `that` (sortBy (\x -> -x) >> toList)
+  `is` (List.sortBy (\x -> -x) << toList)
+  `for` cons int
+
+  , claim "sortWith agrees with List.sortWith"
+  `that` (sortWith reverseCompare >> toList)
+  `is` (List.sortWith reverseCompare << toList)
+  `for` cons int
+
+
+  -- List Functions
+
+  , claim "length agrees with List.length"
+  `that` length
+  `is` (List.length << toList)
+  `for` cons int
 
   ]
 
 cons : Producer a -> Producer (Cons a)
 cons x =
   convert (uncurry Cons.cons) uncons <| tuple (x, list x)
+
+reverseCompare : comparable -> comparable -> Order
+reverseCompare x y =
+  case compare x y of
+    LT -> GT
+    EQ -> EQ
+    GT -> LT
