@@ -70,9 +70,9 @@ The following functions preserve non-emptiness, so given a cons they return a co
 
 # List Functions
 
-Every function from the List library has been adapted to Cons. The following are just convenience functions which convert the cons to a list and then apply the corresponding list function.
+Every function from the List library has been adapted to Cons.
 
-For example, the definition of `sum` is just:
+The following are just convenience functions which convert the cons to a list and then apply the corresponding list function. For example, the definition of `sum` is:
 
     sum = toList >> List.sum
 
@@ -460,6 +460,7 @@ sort = sortWith compare
     alice = {name="Alice", age=30}
     bob = {name="Bob", age=20}
     charlie = {name="Charlie", age=40}
+
     c = cons alice [bob, charlie]
     sortBy .age c == cons bob [alice, charlie]
 -}
@@ -468,11 +469,13 @@ sortBy f = sortWith (\x y -> compare (f x) (f y))
 
 {-| Sort the cons in ascending order, based on the given comparison function.
 
-    reverseCompare a b =
-      case compare a b of
+    reverseCompare : a -> a -> Order
+    reverseCompare x y =
+      case compare x y of
         LT -> GT
         EQ -> EQ
         GT -> LT
+
     c = cons "b" ["a", "c"]
     sortWith reverseCompare c == cons "c" ["b", "a"]
 
@@ -559,8 +562,9 @@ partition f = toList >> List.partition f
 
 {-| Map the given Maybe function over the cons, discarding every Nothing. This can't generally be a cons itself, because it might be empty.
 
-    c = cons "1" ["a", "2", "b"]
     String.toInt : String -> Maybe Int
+
+    c = cons "1" ["a", "2", "b"]
     filterMap String.toInt c == [1, 2]
 -}
 filterMap : (a -> Maybe b) -> Cons a -> List b
