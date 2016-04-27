@@ -438,8 +438,8 @@ scanl f x c = scanlList f x <| toList c
 Equivalent to List.scanl, but with a more specific return type.
 
     step value result = result ++ value
-    scanl step "" [] == cons "" []
-    scanl step "" ["a", "b", "c"] == cons "" ["a", "ab", "abc"]
+    scanlList step "" [] == cons "" []
+    scanlList step "" ["a", "b", "c"] == cons "" ["a", "ab", "abc"]
 -}
 scanlList : (a -> b -> b) -> b -> List a -> Cons b
 scanlList f x l =
