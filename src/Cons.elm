@@ -1,6 +1,6 @@
 module Cons
   ( Cons, cons, uncons, singleton, toList
-  , head, tail, maximum, minimum
+  , head, tail, minimum, maximum
   , foldl1, foldr1, scanl1
   , fromList, cons', uncons', tail', toList', forList
   , reverse, append, appendList, appendToList, concat, intersperse, unzip, map, map2, map3, map4, map5, concatMap, indexedMap, scanl, scanlList, sort, sortBy, sortWith
@@ -34,7 +34,7 @@ Using Cons, on the other hand, the type system knows the list will never be empt
 
 Some functions on Lists are forced to use Maybe to handle the empty list. The following functions are quivalent to their List counterparts, but with no need for Maybe.
 
-@docs head, tail, maximum, minimum
+@docs head, tail, minimum, maximum
 
 
 # Convenient Folds
@@ -143,16 +143,6 @@ head (Cons head _) = head
 tail : Cons a -> List a
 tail (Cons _ tail) = tail
 
-{-| The largest element of the cons.
-
-    c = cons 1 [2, 3]
-    maximum c == 3
-
-    maximum == foldl1 max
--}
-maximum : Cons comparable -> comparable
-maximum = foldl1 max
-
 {-| The smallest element of the cons.
 
     c = cons 1 [2, 3]
@@ -162,6 +152,16 @@ maximum = foldl1 max
 -}
 minimum : Cons comparable -> comparable
 minimum = foldl1 min
+
+{-| The largest element of the cons.
+
+    c = cons 1 [2, 3]
+    maximum c == 3
+
+    maximum == foldl1 max
+-}
+maximum : Cons comparable -> comparable
+maximum = foldl1 max
 
 
 -- Convenient Folds
@@ -469,7 +469,7 @@ sortBy f = sortWith (\x y -> compare (f x) (f y))
 
 {-| Sort the cons in ascending order, based on the given comparison function.
 
-    reverseCompare : a -> a -> Order
+    reverseCompare : comparable -> comparable -> Order
     reverseCompare x y =
       case compare x y of
         LT -> GT
