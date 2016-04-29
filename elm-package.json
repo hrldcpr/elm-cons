@@ -1,6 +1,6 @@
 {
     "version": "1.0.0",
-    "summary": "A non-empty List type",
+    "summary": "A non-empty list data structure.",
     "repository": "https://github.com/hrldcpr/elm-cons.git",
     "license": "BSD3",
     "source-directories": [
