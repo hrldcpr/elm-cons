@@ -18,3 +18,5 @@ Using Cons, on the other hand, the type system knows the list will never be empt
 maximum : Cons comparable -> comparable
 maximum = foldl1 max
 ```
+
+See [the full documentation](http://package.elm-lang.org/packages/hrldcpr/elm-cons/latest/) for more.
