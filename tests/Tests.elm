@@ -65,22 +65,22 @@ checkSuite =
   `for` cons int
 
 
-  -- Convenient Folds
+  -- Convenient Folding
 
   , claim "foldl1 agrees with List.foldl"
-  `that` (uncurry foldl1)
-  `is` (\(f, c) -> List.foldl f (head c) <| tail c)
-  `for` tuple (func2 string, cons string)
+  `that` (foldl1 toString2)
+  `is` (\c -> List.foldl toString2 (head c) <| tail c)
+  `for` cons string
 
   , claim "foldr1 is the reverse of foldl1"
-  `that` (uncurry foldr1)
-  `is` (\(f, c) -> foldl1 f <| reverse c)
-  `for` tuple (func2 string, cons string)
+  `that` (foldr1 toString2)
+  `is` (foldl1 toString2 << reverse)
+  `for` cons string
 
   , claim "scanl1 agrees with scanlList"
-  `that` (uncurry scanl1)
-  `is` (\(f, c) -> scanlList f (head c) <| tail c)
-  `for` tuple (func2 string, cons string)
+  `that` (scanl1 toString2)
+  `is` (\c -> scanlList toString2 (head c) <| tail c)
+  `for` cons string
 
 
   -- List May Be Cons
@@ -154,49 +154,49 @@ checkSuite =
   `for` cons (tuple (int, string))
 
   , claim "map agrees with List.map"
-  `that` (uncurry Cons.map >> toList)
-  `is` (\(f, c) -> List.map f <| toList c)
-  `for` tuple (func string, cons int)
+  `that` (Cons.map toString >> toList)
+  `is` (List.map toString << toList)
+  `for` cons int
 
   , claim "map2 agrees with List.map2"
-  `that` (\(f, c, d) -> Cons.map2 f c d |> toList)
-  `is` (\(f, c, d) -> List.map2 f (toList c) (toList d))
-  `for` tuple3 (func2 string, cons int, cons float)
+  `that` (\(c, d) -> Cons.map2 toString2 c d |> toList)
+  `is` (\(c, d) -> List.map2 toString2 (toList c) (toList d))
+  `for` tuple (cons int, cons string)
 
   , claim "map3 agrees with List.map3"
-  `that` (\(f, a, b, c) -> Cons.map3 f a b c |> toList)
-  `is` (\(f, a, b, c) -> List.map3 f (toList a) (toList b) (toList c))
-  `for` tuple4 (func3 string, cons int, cons float, cons bool)
+  `that` (\(a, b, c) -> Cons.map3 toString3 a b c |> toList)
+  `is` (\(a, b, c) -> List.map3 toString3 (toList a) (toList b) (toList c))
+  `for` tuple3 (cons int, cons string, cons float)
 
   , claim "map4 agrees with List.map4"
-  `that` (\(f, a, b, c, d) -> Cons.map4 f a b c d |> toList)
-  `is` (\(f, a, b, c, d) -> List.map4 f (toList a) (toList b) (toList c) (toList d))
-  `for` tuple5 (func4 string, cons int, cons float, cons bool, cons string)
+  `that` (\(a, b, c, d) -> Cons.map4 toString4 a b c d |> toList)
+  `is` (\(a, b, c, d) -> List.map4 toString4 (toList a) (toList b) (toList c) (toList d))
+  `for` tuple4 (cons int, cons string, cons float, cons bool)
 
   , claim "map5 agrees with List.map5"
-  `that` (\(f, (a, b, c, d, e)) -> Cons.map5 f a b c d e |> toList)
-  `is` (\(f, (a, b, c, d, e)) -> List.map5 f (toList a) (toList b) (toList c) (toList d) (toList e))
-  `for` tuple (func5 string, tuple5 (cons int, cons float, cons bool, cons string, cons percentage))
+  `that` (\(a, b, c, d, e) -> Cons.map5 toString5 a b c d e |> toList)
+  `is` (\(a, b, c, d, e) -> List.map5 toString5 (toList a) (toList b) (toList c) (toList d) (toList e))
+  `for` tuple5 (cons int, cons string, cons float, cons bool, cons percentage)
 
   , claim "concatMap agrees with List.concatMap"
-  `that` (uncurry concatMap >> toList)
-  `is` (\(f, c) -> List.concatMap (f >> toList) <| toList c)
-  `for` tuple (func <| cons string, cons float)
+  `that` (concatMap reverse >> toList)
+  `is` (List.concatMap (reverse >> toList) << toList)
+  `for` cons (cons int)
 
   , claim "indexedMap agrees with List.indexedMap"
-  `that` (uncurry indexedMap >> toList)
-  `is` (\(f, c) -> List.indexedMap f <| toList c)
-  `for` tuple (func2 string, cons float)
+  `that` (indexedMap toString2 >> toList)
+  `is` (List.indexedMap toString2 << toList)
+  `for` cons int
 
   , claim "scanl agrees with scanlList"
-  `that` (\(f, x, c) -> scanl f x c)
-  `is` (\(f, x, c) -> scanlList f x <| toList c)
-  `for` tuple3 (func2 string, string, cons float)
+  `that` (\(x, c) -> scanl toString2 x c)
+  `is` (\(x, c) -> scanlList toString2 x <| toList c)
+  `for` tuple (string, cons int)
 
   , claim "scanlList agrees with List.scanl"
-  `that` (\(f, x, l) -> scanlList f x l |> toList)
-  `is` (\(f, x, l) -> List.scanl f x l)
-  `for` tuple3 (func2 string, string, list float)
+  `that` (\(x, l) -> scanlList toString2 x l |> toList)
+  `is` (\(x, l) -> List.scanl toString2 x l)
+  `for` tuple (string, list int)
 
   , claim "sort agrees with List.sort"
   `that` (sort >> toList)
@@ -216,9 +216,74 @@ checkSuite =
 
   -- List Functions
 
+  , claim "isEmpty agrees with List.isEmpty"
+  `that` isEmpty
+  `is` (List.isEmpty << toList)
+  `for` cons int
+
   , claim "length agrees with List.length"
   `that` length
   `is` (List.length << toList)
+  `for` cons int
+
+  , claim "member agrees with List.member"
+  `that` (uncurry member)
+  `is` (\(x, c) -> List.member x <| toList c)
+  `for` tuple (int, cons int)
+
+  , claim "filter agrees with List.filter"
+  `that` (Cons.filter ((<) 0))
+  `is` (List.filter ((<) 0) << toList)
+  `for` cons int
+
+  , claim "take agrees with List.take"
+  `that` (uncurry take)
+  `is` (\(n, c) -> List.take n <| toList c)
+  `for` tuple (int, cons string)
+
+  , claim "drop agrees with List.drop"
+  `that` (uncurry drop)
+  `is` (\(n, c) -> List.drop n <| toList c)
+  `for` tuple (int, cons string)
+
+  , claim "partition agrees with List.partition"
+  `that` (partition ((<) 0))
+  `is` (List.partition ((<) 0) << toList)
+  `for` cons int
+
+  , claim "filterMap agrees with List.filterMap"
+  `that` (filterMap (sqrt >> maybeNaN))
+  `is` (List.filterMap (sqrt >> maybeNaN) << toList)
+  `for` cons float
+
+  , claim "foldl agrees with List.foldl"
+  `that` (\(x, c) -> foldl toString2 x c)
+  `is` (\(x, c) -> List.foldl toString2 x <| toList c)
+  `for` tuple (string, cons int)
+
+  , claim "foldr agrees with List.foldr"
+  `that` (\(x, c) -> foldr toString2 x c)
+  `is` (\(x, c) -> List.foldr toString2 x <| toList c)
+  `for` tuple (string, cons int)
+
+  , claim "isEmpty agrees with List.isEmpty"
+  `that` isEmpty
+  `is` (List.isEmpty << toList)
+  `for` cons int
+
+  , claim "isEmpty agrees with List.isEmpty"
+  `that` isEmpty
+  `is` (List.isEmpty << toList)
+  `for` cons int
+
+  , claim "isEmpty agrees with List.isEmpty"
+  `that` isEmpty
+  `is` (List.isEmpty << toList)
+  `for` cons int
+
+  , claim "isEmpty agrees with List.isEmpty"
+  `that` isEmpty
+  `is` (List.isEmpty << toList)
   `for` cons int
 
   ]
@@ -227,9 +292,17 @@ cons : Producer a -> Producer (Cons a)
 cons x =
   convert (uncurry Cons.cons) uncons <| tuple (x, list x)
 
+toString2 x y = toString (x, y)
+toString3 x y z = toString (x, y, z)
+toString4 w x y z = toString (w, x, y, z)
+toString5 v w x y z = toString (v, w, x, y, z)
+
 reverseCompare : comparable -> comparable -> Order
 reverseCompare x y =
   case compare x y of
     LT -> GT
     EQ -> EQ
     GT -> LT
+
+maybeNaN : Float -> Maybe Float
+maybeNaN x = if isNaN x then Nothing else Just x

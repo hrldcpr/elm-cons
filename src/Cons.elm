@@ -37,7 +37,7 @@ Some functions on Lists are forced to use Maybe to handle the empty list. The fo
 @docs head, tail, minimum, maximum
 
 
-# Convenient Folds
+# Convenient Folding
 
 Folds over Lists require a start value, but the following fold functions take the start value from the cons.
 
@@ -164,7 +164,7 @@ maximum : Cons comparable -> comparable
 maximum = foldl1 max
 
 
--- Convenient Folds
+-- Convenient Folding
 
 {-| Reduce the cons from the left.
 
