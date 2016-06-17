@@ -1,12 +1,16 @@
-module Tests where
+module Tests exposing (..)
 
 import Check exposing (..)
 import Check.Producer exposing (..)
 import Check.Test
+import ElmTest
 
 import Cons exposing (..)
 import List
 
+
+main =
+  ElmTest.runSuite all
 
 all =
   quickCheck checkSuite |> Check.Test.evidenceToTest

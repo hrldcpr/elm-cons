@@ -1,11 +1,11 @@
-module Cons
+module Cons exposing
   ( Cons, cons, uncons, singleton, toList
   , head, tail, minimum, maximum
   , foldl1, foldr1, scanl1
   , fromList, cons', uncons', tail', toList', forList
   , reverse, append, appendList, appendToList, concat, intersperse, unzip, map, map2, map3, map4, map5, concatMap, indexedMap, scanl, scanlList, sort, sortBy, sortWith
   , isEmpty, length, member, filter, take, drop, partition, filterMap, foldl, foldr, sum, product, all, any
-  ) where
+  )
 
 {-| This library provides a type for non-empty lists, called `Cons`.
 
