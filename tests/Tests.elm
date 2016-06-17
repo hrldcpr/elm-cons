@@ -68,18 +68,18 @@ checkSuite =
   -- Convenient Folding
 
   , claim "foldl1 agrees with List.foldl"
-  `that` (foldl1 toString2)
-  `is` (\c -> List.foldl toString2 (head c) <| tail c)
+  `that` (foldl1 (++))
+  `is` (\c -> List.foldl (++) (head c) <| tail c)
   `for` cons string
 
   , claim "foldr1 is the reverse of foldl1"
-  `that` (foldr1 toString2)
-  `is` (foldl1 toString2 << reverse)
+  `that` (foldr1 (++))
+  `is` (foldl1 (++) << reverse)
   `for` cons string
 
   , claim "scanl1 agrees with scanlList"
-  `that` (scanl1 toString2)
-  `is` (\c -> scanlList toString2 (head c) <| tail c)
+  `that` (scanl1 (++))
+  `is` (\c -> scanlList (++) (head c) <| tail c)
   `for` cons string
 
 
@@ -189,14 +189,14 @@ checkSuite =
   `for` cons int
 
   , claim "scanl agrees with scanlList"
-  `that` (\(x, c) -> scanl toString2 x c)
-  `is` (\(x, c) -> scanlList toString2 x <| toList c)
-  `for` tuple (string, cons int)
+  `that` (\(x, c) -> scanl (++) x c)
+  `is` (\(x, c) -> scanlList (++) x <| toList c)
+  `for` tuple (string, cons string)
 
   , claim "scanlList agrees with List.scanl"
-  `that` (\(x, l) -> scanlList toString2 x l |> toList)
-  `is` (\(x, l) -> List.scanl toString2 x l)
-  `for` tuple (string, list int)
+  `that` (\(x, l) -> scanlList (++) x l |> toList)
+  `is` (\(x, l) -> List.scanl (++) x l)
+  `for` tuple (string, list string)
 
   , claim "sort agrees with List.sort"
   `that` (sort >> toList)
@@ -257,14 +257,14 @@ checkSuite =
   `for` cons float
 
   , claim "foldl agrees with List.foldl"
-  `that` (\(x, c) -> foldl toString2 x c)
-  `is` (\(x, c) -> List.foldl toString2 x <| toList c)
-  `for` tuple (string, cons int)
+  `that` (\(x, c) -> foldl (++) x c)
+  `is` (\(x, c) -> List.foldl (++) x <| toList c)
+  `for` tuple (string, cons string)
 
   , claim "foldr agrees with List.foldr"
-  `that` (\(x, c) -> foldr toString2 x c)
-  `is` (\(x, c) -> List.foldr toString2 x <| toList c)
-  `for` tuple (string, cons int)
+  `that` (\(x, c) -> foldr (++) x c)
+  `is` (\(x, c) -> List.foldr (++) x <| toList c)
+  `for` tuple (string, cons string)
 
   , claim "isEmpty agrees with List.isEmpty"
   `that` isEmpty
