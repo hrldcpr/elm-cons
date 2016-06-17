@@ -1,5 +1,5 @@
 {
-    "version": "1.0.1",
+    "version": "1.0.2",
     "summary": "A non-empty list data structure.",
     "repository": "https://github.com/hrldcpr/elm-cons.git",
     "license": "BSD3",
