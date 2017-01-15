@@ -13,10 +13,10 @@ module Cons
         , foldr1
         , scanl1
         , fromList
-        , cons_
-        , uncons_
-        , tail_
-        , toList_
+        , consWithMaybe
+        , unconsWithMaybe
+        , maybeTail
+        , toMaybeList
         , forList
         , reverse
         , append
@@ -100,11 +100,11 @@ This is useful for recursion on Cons. For example, to recursively find the maxim
 
     maximum : Cons comparable -> comparable
     maximum c =
-      case uncons' c of
+      case unconsWithMaybe c of
         (first, Nothing) -> first
         (first, Just rest) -> max first <| maximum rest
 
-@docs fromList, cons', uncons', tail', toList', forList
+@docs fromList, consWithMaybe, unconsWithMaybe, maybeTail, toMaybeList, forList
 
 
 # Preserving Non-Emptiness
@@ -251,7 +251,7 @@ foldl1 f (Cons head tail) =
 -}
 foldr1 : (a -> a -> a) -> Cons a -> a
 foldr1 f c =
-    case uncons_ c of
+    case unconsWithMaybe c of
         ( head, Nothing ) ->
             head
 
@@ -291,52 +291,52 @@ fromList l =
 
 {-| A cons with the given head and tail.
 
-    c = cons' "a" Nothing
+    c = consWithMaybe "a" Nothing
     toList c == ["a"]
 
-    d = cons' 1 <| Just <| cons' 2 <| Just <| cons' 3 Nothing
+    d = consWithMaybe 1 <| Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing
     toList d = [1, 2, 3]
 -}
-cons_ : a -> Maybe (Cons a) -> Cons a
-cons_ head tail =
-    cons head <| toList_ tail
+consWithMaybe : a -> Maybe (Cons a) -> Cons a
+consWithMaybe head tail =
+    cons head <| toMaybeList tail
 
 
 {-| The head and tail of the cons.
 
-    c = cons' "a" Nothing
-    uncons' c == ("a", Nothing)
+    c = consWithMaybe "a" Nothing
+    unconsWithMaybe c == ("a", Nothing)
 
-    d = cons' 1 <| Just <| cons' 2 <| Just <| cons' 3 Nothing
-    uncons' d == (1, Just <| cons' 2 <| Just <| cons' 3 Nothing)
+    d = consWithMaybe 1 <| Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing
+    unconsWithMaybe d == (1, Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing)
 
     maximum : Cons comparable -> comparable
     maximum c =
-      case uncons' c of
+      case unconsWithMaybe c of
         (first, Nothing) -> first
         (first, Just rest) -> max first <| maximum rest
 -}
-uncons_ : Cons a -> ( a, Maybe (Cons a) )
-uncons_ (Cons head tail) =
+unconsWithMaybe : Cons a -> ( a, Maybe (Cons a) )
+unconsWithMaybe (Cons head tail) =
     ( head, fromList tail )
 
 
 {-| The tail of the cons.
 
-    c = cons' "a" Nothing
-    tail' c == Nothing
+    c = consWithMaybe "a" Nothing
+    maybeTail c == Nothing
 
-    d = cons' 1 <| Just <| cons' 2 <| Just <| cons' 3 Nothing
-    tail' d == Just <| cons' 2 <| Just <| cons' 3 Nothing
+    d = consWithMaybe 1 <| Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing
+    maybeTail d == Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing
 
     length : Cons a -> Int
     length c =
-      case tail' c of
+      case maybeTail c of
         Nothing -> 1
         Just rest -> 1 + length rest
 -}
-tail_ : Cons a -> Maybe (Cons a)
-tail_ =
+maybeTail : Cons a -> Maybe (Cons a)
+maybeTail =
     tail >> fromList
 
 
@@ -346,14 +346,14 @@ This is the inverse of fromList.
 
     c = fromList []
     c == Nothing
-    toList' c == []
+    toMaybeList c == []
 
     c = fromList [1, 2, 3]
     c == Just <| cons 1 [2, 3]
-    toList' c == [1, 2, 3]
+    toMaybeList c == [1, 2, 3]
 -}
-toList_ : Maybe (Cons a) -> List a
-toList_ =
+toMaybeList : Maybe (Cons a) -> List a
+toMaybeList =
     Maybe.map toList >> Maybe.withDefault []
 
 
@@ -543,7 +543,7 @@ indexedMap : (Int -> a -> b) -> Cons a -> Cons b
 indexedMap f c =
     let
         go i c =
-            cons_ (f i <| head c) <| Maybe.map (go (i + 1)) <| tail_ c
+            consWithMaybe (f i <| head c) <| Maybe.map (go (i + 1)) <| maybeTail c
     in
         go 0 c
 
