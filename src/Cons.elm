@@ -16,7 +16,7 @@ module Cons
         , consWithMaybe
         , unconsWithMaybe
         , maybeTail
-        , toMaybeList
+        , maybeToList
         , forList
         , reverse
         , append
@@ -104,7 +104,7 @@ This is useful for recursion on Cons. For example, to recursively find the maxim
         (first, Nothing) -> first
         (first, Just rest) -> max first <| maximum rest
 
-@docs fromList, consWithMaybe, unconsWithMaybe, maybeTail, toMaybeList, forList
+@docs fromList, consWithMaybe, unconsWithMaybe, maybeTail, maybeToList, forList
 
 
 # Preserving Non-Emptiness
@@ -299,7 +299,7 @@ fromList l =
 -}
 consWithMaybe : a -> Maybe (Cons a) -> Cons a
 consWithMaybe head tail =
-    cons head <| toMaybeList tail
+    cons head <| maybeToList tail
 
 
 {-| The head and tail of the cons.
@@ -346,14 +346,14 @@ This is the inverse of fromList.
 
     c = fromList []
     c == Nothing
-    toMaybeList c == []
+    maybeToList c == []
 
     c = fromList [1, 2, 3]
     c == Just <| cons 1 [2, 3]
-    toMaybeList c == [1, 2, 3]
+    maybeToList c == [1, 2, 3]
 -}
-toMaybeList : Maybe (Cons a) -> List a
-toMaybeList =
+maybeToList : Maybe (Cons a) -> List a
+maybeToList =
     Maybe.map toList >> Maybe.withDefault []
 
 

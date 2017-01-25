@@ -23,7 +23,7 @@ checkSuite =
         , for (is (that (claim "cons is inverse of uncons") (uncurry Cons.cons << uncons)) identity) (cons int)
         , for (is (that (claim "uncons is inverse of cons") (uncons << uncurry Cons.cons)) identity) (tuple ( int, list int ))
         , for (is (that (claim "singleton cons agrees with singleton list") (singleton >> toList)) (\x -> [ x ])) int
-        , for (is (that (claim "toList agrees with toMaybeList") toList) (toMaybeList << Just)) (cons int)
+        , for (is (that (claim "toList agrees with maybeToList") toList) (maybeToList << Just)) (cons int)
           -- Avoiding Maybe
         , for (is (that (claim "head agrees with List.head") (head >> Just)) (List.head << toList)) (cons int)
         , for (is (that (claim "tail agrees with List.tail") (tail >> Just)) (List.tail << toList)) (cons int)
@@ -34,11 +34,11 @@ checkSuite =
         , for (is (that (claim "foldr1 is the reverse of foldl1") (foldr1 (++))) (foldl1 (++) << reverse)) (cons string)
         , for (is (that (claim "scanl1 agrees with scanlList") (scanl1 (++))) (\c -> scanlList (++) (head c) <| tail c)) (cons string)
           -- List May Be Cons
-        , for (is (that (claim "fromList is inverse of toMaybeList") (fromList << toMaybeList)) identity) (maybe (cons int))
+        , for (is (that (claim "fromList is inverse of maybeToList") (fromList << maybeToList)) identity) (maybe (cons int))
         , for (is (that (claim "consWithMaybe is inverse of unconsWithMaybe") (uncurry consWithMaybe << unconsWithMaybe)) identity) (cons int)
         , for (is (that (claim "unconsWithMaybe is inverse of consWithMaybe") (unconsWithMaybe << uncurry consWithMaybe)) identity) (tuple ( int, maybe (cons int) ))
         , for (is (that (claim "maybeTail agrees with tail") maybeTail) (tail >> fromList)) (cons int)
-        , for (is (that (claim "toMaybeList is inverse of fromList") (toMaybeList << fromList)) identity) (list int)
+        , for (is (that (claim "maybeToList is inverse of fromList") (maybeToList << fromList)) identity) (list int)
         , for (is (that (claim "forList turns head, tail, minimum, and maximum into their List equivalents") (\l -> ( forList head l, forList tail l, forList minimum l, forList maximum l ))) (\l -> ( List.head l, List.tail l, List.minimum l, List.maximum l ))) (list int)
           -- Preserving Non-Emptiness
         , for (is (that (claim "reverse agrees with List.reverse") (reverse >> toList)) (List.reverse << toList)) (cons int)
