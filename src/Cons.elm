@@ -1,11 +1,57 @@
-module Cons exposing
-  ( Cons, cons, uncons, singleton, toList
-  , head, tail, minimum, maximum
-  , foldl1, foldr1, scanl1
-  , fromList, cons', uncons', tail', toList', forList
-  , reverse, append, appendList, appendToList, concat, intersperse, unzip, map, map2, map3, map4, map5, concatMap, indexedMap, scanl, scanlList, sort, sortBy, sortWith
-  , isEmpty, length, member, filter, take, drop, partition, filterMap, foldl, foldr, sum, product, all, any
-  )
+module Cons
+    exposing
+        ( Cons
+        , cons
+        , uncons
+        , singleton
+        , toList
+        , head
+        , tail
+        , minimum
+        , maximum
+        , foldl1
+        , foldr1
+        , scanl1
+        , fromList
+        , consWithMaybe
+        , unconsWithMaybe
+        , maybeTail
+        , maybeToList
+        , forList
+        , reverse
+        , append
+        , appendList
+        , appendToList
+        , concat
+        , intersperse
+        , unzip
+        , map
+        , map2
+        , map3
+        , map4
+        , map5
+        , concatMap
+        , indexedMap
+        , scanl
+        , scanlList
+        , sort
+        , sortBy
+        , sortWith
+        , isEmpty
+        , length
+        , member
+        , filter
+        , take
+        , drop
+        , partition
+        , filterMap
+        , foldl
+        , foldr
+        , sum
+        , product
+        , all
+        , any
+        )
 
 {-| This library provides a type for non-empty lists, called `Cons`.
 
@@ -54,11 +100,11 @@ This is useful for recursion on Cons. For example, to recursively find the maxim
 
     maximum : Cons comparable -> comparable
     maximum c =
-      case uncons' c of
+      case unconsWithMaybe c of
         (first, Nothing) -> first
         (first, Just rest) -> max first <| maximum rest
 
-@docs fromList, cons', uncons', tail', toList', forList
+@docs fromList, consWithMaybe, unconsWithMaybe, maybeTail, maybeToList, forList
 
 
 # Preserving Non-Emptiness
@@ -79,16 +125,18 @@ The following are just convenience functions which convert the cons to a list an
 @docs isEmpty, length, member, filter, take, drop, partition, filterMap, foldl, foldr, sum, product, all, any
 -}
 
-
 import List
 
 
 {-| A non-empty list of elements of type `a`.
 -}
-type Cons a = Cons a (List a)
+type Cons a
+    = Cons a (List a)
+
 
 
 -- Basics
+
 
 {-| A cons with the given head and tail. Equivalent to ::
 
@@ -98,15 +146,19 @@ type Cons a = Cons a (List a)
 
 -}
 cons : a -> List a -> Cons a
-cons = Cons
+cons =
+    Cons
+
 
 {-| The head and tail of the cons.
 
     c = cons 1 [2, 3]
     uncons c == (1, [2, 3])
 -}
-uncons : Cons a -> (a, List a)
-uncons (Cons head tail) = (head, tail)
+uncons : Cons a -> ( a, List a )
+uncons (Cons head tail) =
+    ( head, tail )
+
 
 {-| A cons containing only the given element.
 
@@ -114,7 +166,9 @@ uncons (Cons head tail) = (head, tail)
     toList c == ["a"]
 -}
 singleton : a -> Cons a
-singleton x = cons x []
+singleton x =
+    cons x []
+
 
 {-| Convert the cons to the equivalent list.
 
@@ -122,10 +176,13 @@ singleton x = cons x []
     toList c == [1, 2, 3]
 -}
 toList : Cons a -> List a
-toList (Cons head tail) = head::tail
+toList (Cons head tail) =
+    head :: tail
+
 
 
 -- Avoiding Maybe
+
 
 {-| The first element of the cons.
 
@@ -133,7 +190,9 @@ toList (Cons head tail) = head::tail
     head c == 1
 -}
 head : Cons a -> a
-head (Cons head _) = head
+head (Cons head _) =
+    head
+
 
 {-| The list of all elements after the first element of the cons.
 
@@ -141,7 +200,9 @@ head (Cons head _) = head
     tail c == [2, 3]
 -}
 tail : Cons a -> List a
-tail (Cons _ tail) = tail
+tail (Cons _ tail) =
+    tail
+
 
 {-| The smallest element of the cons.
 
@@ -151,7 +212,9 @@ tail (Cons _ tail) = tail
     minimum == foldl1 min
 -}
 minimum : Cons comparable -> comparable
-minimum = foldl1 min
+minimum =
+    foldl1 min
+
 
 {-| The largest element of the cons.
 
@@ -161,10 +224,13 @@ minimum = foldl1 min
     maximum == foldl1 max
 -}
 maximum : Cons comparable -> comparable
-maximum = foldl1 max
+maximum =
+    foldl1 max
+
 
 
 -- Convenient Folding
+
 
 {-| Reduce the cons from the left.
 
@@ -173,7 +239,9 @@ maximum = foldl1 max
     foldl1 step c == "abc"
 -}
 foldl1 : (a -> a -> a) -> Cons a -> a
-foldl1 f (Cons head tail) = List.foldl f head tail
+foldl1 f (Cons head tail) =
+    List.foldl f head tail
+
 
 {-| Reduce the cons from the right.
 
@@ -183,9 +251,13 @@ foldl1 f (Cons head tail) = List.foldl f head tail
 -}
 foldr1 : (a -> a -> a) -> Cons a -> a
 foldr1 f c =
-  case uncons' c of
-    (head, Nothing) -> head
-    (head, Just tail) -> f head <| foldr1 f tail
+    case unconsWithMaybe c of
+        ( head, Nothing ) ->
+            head
+
+        ( head, Just tail ) ->
+            f head <| foldr1 f tail
+
 
 {-| Reduce the cons from the left, producing a cons of all intermediate results.
 
@@ -194,10 +266,13 @@ foldr1 f c =
     scanl1 step c == cons "a" ["ab", "abc"]
 -}
 scanl1 : (a -> a -> a) -> Cons a -> Cons a
-scanl1 f (Cons head tail) = scanlList f head tail
+scanl1 f (Cons head tail) =
+    scanlList f head tail
+
 
 
 -- List May Be Cons
+
 
 {-| Convert the list to the equivalent cons, or Nothing for the empty list.
 
@@ -206,54 +281,64 @@ scanl1 f (Cons head tail) = scanlList f head tail
 -}
 fromList : List a -> Maybe (Cons a)
 fromList l =
-  case l of
-    [] -> Nothing
-    head::tail -> Just <| cons head tail
+    case l of
+        [] ->
+            Nothing
+
+        head :: tail ->
+            Just <| cons head tail
+
 
 {-| A cons with the given head and tail.
 
-    c = cons' "a" Nothing
+    c = consWithMaybe "a" Nothing
     toList c == ["a"]
 
-    d = cons' 1 <| Just <| cons' 2 <| Just <| cons' 3 Nothing
+    d = consWithMaybe 1 <| Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing
     toList d = [1, 2, 3]
 -}
-cons' : a -> Maybe (Cons a) -> Cons a
-cons' head tail = cons head <| toList' tail
+consWithMaybe : a -> Maybe (Cons a) -> Cons a
+consWithMaybe head tail =
+    cons head <| maybeToList tail
+
 
 {-| The head and tail of the cons.
 
-    c = cons' "a" Nothing
-    uncons' c == ("a", Nothing)
+    c = consWithMaybe "a" Nothing
+    unconsWithMaybe c == ("a", Nothing)
 
-    d = cons' 1 <| Just <| cons' 2 <| Just <| cons' 3 Nothing
-    uncons' d == (1, Just <| cons' 2 <| Just <| cons' 3 Nothing)
+    d = consWithMaybe 1 <| Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing
+    unconsWithMaybe d == (1, Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing)
 
     maximum : Cons comparable -> comparable
     maximum c =
-      case uncons' c of
+      case unconsWithMaybe c of
         (first, Nothing) -> first
         (first, Just rest) -> max first <| maximum rest
 -}
-uncons' : Cons a -> (a, Maybe (Cons a))
-uncons' (Cons head tail) = (head, fromList tail)
+unconsWithMaybe : Cons a -> ( a, Maybe (Cons a) )
+unconsWithMaybe (Cons head tail) =
+    ( head, fromList tail )
+
 
 {-| The tail of the cons.
 
-    c = cons' "a" Nothing
-    tail' c == Nothing
+    c = consWithMaybe "a" Nothing
+    maybeTail c == Nothing
 
-    d = cons' 1 <| Just <| cons' 2 <| Just <| cons' 3 Nothing
-    tail' d == Just <| cons' 2 <| Just <| cons' 3 Nothing
+    d = consWithMaybe 1 <| Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing
+    maybeTail d == Just <| consWithMaybe 2 <| Just <| consWithMaybe 3 Nothing
 
     length : Cons a -> Int
     length c =
-      case tail' c of
+      case maybeTail c of
         Nothing -> 1
         Just rest -> 1 + length rest
 -}
-tail' : Cons a -> Maybe (Cons a)
-tail' = tail >> fromList
+maybeTail : Cons a -> Maybe (Cons a)
+maybeTail =
+    tail >> fromList
+
 
 {-| Convert the cons to the equivalent list, or the empty list for Nothing.
 
@@ -261,14 +346,16 @@ This is the inverse of fromList.
 
     c = fromList []
     c == Nothing
-    toList' c == []
+    maybeToList c == []
 
     c = fromList [1, 2, 3]
     c == Just <| cons 1 [2, 3]
-    toList' c == [1, 2, 3]
+    maybeToList c == [1, 2, 3]
 -}
-toList' : Maybe (Cons a) -> List a
-toList' = Maybe.map toList >> Maybe.withDefault []
+maybeToList : Maybe (Cons a) -> List a
+maybeToList =
+    Maybe.map toList >> Maybe.withDefault []
+
 
 {-| Convert a function that operates on Cons to a function that operates on List, where the empty list results in Nothing.
 
@@ -282,10 +369,13 @@ toList' = Maybe.map toList >> Maybe.withDefault []
     listMaximum [1, 2, 3] == Just 3
 -}
 forList : (Cons a -> b) -> List a -> Maybe b
-forList f = fromList >> Maybe.map f
+forList f =
+    fromList >> Maybe.map f
+
 
 
 -- Preserving Non-Emptiness
+
 
 {-| Reverse the cons.
 
@@ -293,7 +383,9 @@ forList f = fromList >> Maybe.map f
     reverse c == cons 3 [2, 1]
 -}
 reverse : Cons a -> Cons a
-reverse (Cons head tail) = appendToList (List.reverse tail) <| singleton head
+reverse (Cons head tail) =
+    appendToList (List.reverse tail) <| singleton head
+
 
 {-| Append the second cons to the first.
 
@@ -303,10 +395,12 @@ reverse (Cons head tail) = appendToList (List.reverse tail) <| singleton head
 -}
 append : Cons a -> Cons a -> Cons a
 append c d =
-  let
-    step x xs = cons x <| toList xs
-  in
-    foldr step d c
+    let
+        step x xs =
+            cons x <| toList xs
+    in
+        foldr step d c
+
 
 {-| Append a list to a cons.
 
@@ -316,9 +410,13 @@ append c d =
 -}
 appendList : Cons a -> List a -> Cons a
 appendList c l =
-  case fromList l of
-    Nothing -> c
-    Just d -> append c d
+    case fromList l of
+        Nothing ->
+            c
+
+        Just d ->
+            append c d
+
 
 {-| Append a cons to a list.
 
@@ -328,9 +426,13 @@ appendList c l =
 -}
 appendToList : List a -> Cons a -> Cons a
 appendToList l d =
-  case fromList l of
-    Nothing -> d
-    Just c -> append c d
+    case fromList l of
+        Nothing ->
+            d
+
+        Just c ->
+            append c d
+
 
 {-| Concatenate a non-empty list of non-empty lists.
 
@@ -343,7 +445,9 @@ appendToList l d =
     concat == foldr1 append
 -}
 concat : Cons (Cons a) -> Cons a
-concat = foldr1 append
+concat =
+    foldr1 append
+
 
 {-| Intersperse the value between each element of the cons.
 
@@ -352,21 +456,27 @@ concat = foldr1 append
 -}
 intersperse : a -> Cons a -> Cons a
 intersperse x c =
-  case uncons c of
-    (head, []) -> c
-    (head, tail) -> cons head <| x :: List.intersperse x tail
+    case uncons c of
+        ( head, [] ) ->
+            c
+
+        ( head, tail ) ->
+            cons head <| x :: List.intersperse x tail
+
 
 {-| A tuple of each cons, corresponding to a cons of tuples.
 
     c = cons (1, "a") [(2, "b"), (3, "c")]
     unzip c == (cons 1 [2, 3], cons "a" ["b", "c"])
 -}
-unzip : Cons (a, b) -> (Cons a, Cons b)
-unzip (Cons (x, y) tail) =
-  let
-    (xs, ys) = List.unzip tail
-  in
-    (cons x xs, cons y ys)
+unzip : Cons ( a, b ) -> ( Cons a, Cons b )
+unzip (Cons ( x, y ) tail) =
+    let
+        ( xs, ys ) =
+            List.unzip tail
+    in
+        ( cons x xs, cons y ys )
+
 
 {-| Apply a function to each element of the cons.
 
@@ -374,7 +484,9 @@ unzip (Cons (x, y) tail) =
     map sqrt c == cons 1 [2, 3]
 -}
 map : (a -> b) -> Cons a -> Cons b
-map f (Cons head tail) = cons (f head) <| List.map f tail
+map f (Cons head tail) =
+    cons (f head) <| List.map f tail
+
 
 {-| Apply a function to each pair of elements, limited by the shortest cons.
 
@@ -385,19 +497,27 @@ map f (Cons head tail) = cons (f head) <| List.map f tail
     zip c d = cons (1, "a") [(2, "b"), (3, "c")]
 -}
 map2 : (a -> b -> c) -> Cons a -> Cons b -> Cons c
-map2 f (Cons x xs) (Cons y ys) = cons (f x y) <| List.map2 f xs ys
+map2 f (Cons x xs) (Cons y ys) =
+    cons (f x y) <| List.map2 f xs ys
 
-{-|-}
+
+{-| -}
 map3 : (a -> b -> c -> d) -> Cons a -> Cons b -> Cons c -> Cons d
-map3 f (Cons x xs) (Cons y ys) (Cons z zs) = cons (f x y z) <| List.map3 f xs ys zs
+map3 f (Cons x xs) (Cons y ys) (Cons z zs) =
+    cons (f x y z) <| List.map3 f xs ys zs
 
-{-|-}
+
+{-| -}
 map4 : (a -> b -> c -> d -> e) -> Cons a -> Cons b -> Cons c -> Cons d -> Cons e
-map4 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) = cons (f v w x y) <| List.map4 f vs ws xs ys
+map4 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) =
+    cons (f v w x y) <| List.map4 f vs ws xs ys
 
-{-|-}
+
+{-| -}
 map5 : (a -> b -> c -> d -> e -> f) -> Cons a -> Cons b -> Cons c -> Cons d -> Cons e -> Cons f
-map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) = cons (f v w x y z) <| List.map5 f vs ws xs ys zs
+map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) =
+    cons (f v w x y z) <| List.map5 f vs ws xs ys zs
+
 
 {-| Also known as "flat map", map each element of the cons to a cons, and then concatenate them together.
 
@@ -410,7 +530,9 @@ map5 f (Cons v vs) (Cons w ws) (Cons x xs) (Cons y ys) (Cons z zs) = cons (f v w
     concatMap f == concat << map f
 -}
 concatMap : (a -> Cons b) -> Cons a -> Cons b
-concatMap f = concat << map f
+concatMap f =
+    concat << map f
+
 
 {-| Apply a function to each element of the cons, as well as the index.
 
@@ -419,10 +541,12 @@ concatMap f = concat << map f
 -}
 indexedMap : (Int -> a -> b) -> Cons a -> Cons b
 indexedMap f c =
-  let
-    go i c = cons' (f i <| head c) <| Maybe.map (go (i + 1)) <| tail' c
-  in
-    go 0 c
+    let
+        go i c =
+            consWithMaybe (f i <| head c) <| Maybe.map (go (i + 1)) <| maybeTail c
+    in
+        go 0 c
+
 
 {-| Reduce the cons from the left, producing a cons of all intermediate results.
 
@@ -431,7 +555,9 @@ indexedMap f c =
     scanl step "" c == cons "" ["a", "ab", "abc"]
 -}
 scanl : (a -> b -> b) -> b -> Cons a -> Cons b
-scanl f x c = scanlList f x <| toList c
+scanl f x c =
+    scanlList f x <| toList c
+
 
 {-| Reduce the list from the left, producing a cons of all intermediate results, since even for the empty list there is one intermediate result.
 
@@ -443,9 +569,14 @@ Equivalent to List.scanl, but with a more specific return type.
 -}
 scanlList : (a -> b -> b) -> b -> List a -> Cons b
 scanlList f x l =
-  cons x <| case l of
-              [] -> []
-              head::tail -> List.scanl f (f head x) tail
+    cons x <|
+        case l of
+            [] ->
+                []
+
+            head :: tail ->
+                List.scanl f (f head x) tail
+
 
 {-| Sort the cons in ascending order.
 
@@ -453,7 +584,9 @@ scanlList f x l =
     sort c == cons 1 [2, 3]
 -}
 sort : Cons comparable -> Cons comparable
-sort = sortWith compare
+sort =
+    sortWith compare
+
 
 {-| Sort the cons in ascending order, by applying the given function to each value.
 
@@ -465,7 +598,9 @@ sort = sortWith compare
     sortBy .age c == cons bob [alice, charlie]
 -}
 sortBy : (a -> comparable) -> Cons a -> Cons a
-sortBy f = sortWith (\x y -> compare (f x) (f y))
+sortBy f =
+    sortWith (\x y -> compare (f x) (f y))
+
 
 {-| Sort the cons in ascending order, based on the given comparison function.
 
@@ -482,29 +617,39 @@ sortBy f = sortWith (\x y -> compare (f x) (f y))
     sortWith compare == sort
 -}
 sortWith : (a -> a -> Order) -> Cons a -> Cons a
-sortWith f c = insortWith f (head c) <| List.sortWith f <| tail c
+sortWith f c =
+    insortWith f (head c) <| List.sortWith f <| tail c
+
+
 
 -- insert a value into a sorted list
+
+
 insortWith : (a -> a -> Order) -> a -> List a -> Cons a
 insortWith f x l =
-  case l of
-    [] ->
-      singleton x
-    head::tail ->
-      if f x head == GT then
-        cons head <| toList <| insortWith f x tail
-      else
-        cons x l
+    case l of
+        [] ->
+            singleton x
+
+        head :: tail ->
+            if f x head == GT then
+                cons head <| toList <| insortWith f x tail
+            else
+                cons x l
+
 
 
 -- List Functions
+
 
 {-| Always false for a cons, only here to make porting List code easier.
 
     isEmpty == always False
 -}
 isEmpty : Cons a -> Bool
-isEmpty = toList >> List.isEmpty
+isEmpty =
+    toList >> List.isEmpty
+
 
 {-| The number of elements in the cons.
 
@@ -512,7 +657,9 @@ isEmpty = toList >> List.isEmpty
     length c == 3
 -}
 length : Cons a -> Int
-length = toList >> List.length
+length =
+    toList >> List.length
+
 
 {-| True if and only if the given element is in the given cons.
 
@@ -521,7 +668,9 @@ length = toList >> List.length
     member 2 c == True
 -}
 member : a -> Cons a -> Bool
-member x = toList >> List.member x
+member x =
+    toList >> List.member x
+
 
 {-| The list of elements from the cons which satisfy the given predicate. This can't generally be a cons itself, because it might be empty.
 
@@ -530,7 +679,9 @@ member x = toList >> List.member x
     filter (\x -> x > 1) c == [2, 3]
 -}
 filter : (a -> Bool) -> Cons a -> List a
-filter f = toList >> List.filter f
+filter f =
+    toList >> List.filter f
+
 
 {-| The first *n* elements of the cons, up to the length of the cons. This can't generally be a cons itself, since *n* might not be positive.
 
@@ -540,7 +691,9 @@ filter f = toList >> List.filter f
     take -10 c == []
 -}
 take : Int -> Cons a -> List a
-take n = toList >> List.take n
+take n =
+    toList >> List.take n
+
 
 {-| The cons without its first *n* elements. This can't generally be a cons itself, because it might be empty.
 
@@ -550,15 +703,19 @@ take n = toList >> List.take n
     drop -10 c == toList c
 -}
 drop : Int -> Cons a -> List a
-drop n = toList >> List.drop n
+drop n =
+    toList >> List.drop n
+
 
 {-| Partition the cons into two lists, the first containing the elements which satisfy the given predicate, the second containing the elements which don't. These can't generally be a cons themselves, since one might be empty.
 
     c = cons 1 [2, 3]
     partition (\x -> x > 1) c == ([2, 3], [1])
 -}
-partition : (a -> Bool) -> Cons a -> (List a, List a)
-partition f = toList >> List.partition f
+partition : (a -> Bool) -> Cons a -> ( List a, List a )
+partition f =
+    toList >> List.partition f
+
 
 {-| Map the given Maybe function over the cons, discarding every Nothing. This can't generally be a cons itself, because it might be empty.
 
@@ -568,7 +725,9 @@ partition f = toList >> List.partition f
     filterMap String.toInt c == [1, 2]
 -}
 filterMap : (a -> Maybe b) -> Cons a -> List b
-filterMap f = toList >> List.filterMap f
+filterMap f =
+    toList >> List.filterMap f
+
 
 {-| Reduce the cons from the right, starting with the given value. To start with the last value in the cons, use [foldr1](#foldr1).
 
@@ -577,7 +736,9 @@ filterMap f = toList >> List.filterMap f
     foldr1 step "x" c == "xcba"
 -}
 foldr : (a -> b -> b) -> b -> Cons a -> b
-foldr f x = toList >> List.foldr f x
+foldr f x =
+    toList >> List.foldr f x
+
 
 {-| Reduce the cons from the left, starting with the given value. To start with the first value in the cons, use [foldl1](#foldl1).
 
@@ -586,7 +747,9 @@ foldr f x = toList >> List.foldr f x
     foldl1 step "x" c == "xabc"
 -}
 foldl : (a -> b -> b) -> b -> Cons a -> b
-foldl f x = toList >> List.foldl f x
+foldl f x =
+    toList >> List.foldl f x
+
 
 {-| The sum of the elements of the cons.
 
@@ -594,7 +757,9 @@ foldl f x = toList >> List.foldl f x
     sum c == 9
 -}
 sum : Cons number -> number
-sum = toList >> List.sum
+sum =
+    toList >> List.sum
+
 
 {-| The product of the elements of the cons.
 
@@ -602,7 +767,9 @@ sum = toList >> List.sum
     product c == 24
 -}
 product : Cons number -> number
-product = toList >> List.product
+product =
+    toList >> List.product
+
 
 {-| True if and only if all elements of the cons satisfy the given predicate.
 
@@ -611,7 +778,9 @@ product = toList >> List.product
     all (\x -> x > 0) == True
 -}
 all : (a -> Bool) -> Cons a -> Bool
-all f = toList >> List.all f
+all f =
+    toList >> List.all f
+
 
 {-| True if and only if any elements of the cons satisfy the given predicate.
 
@@ -620,4 +789,5 @@ all f = toList >> List.all f
     any (\x -> x > 2) == True
 -}
 any : (a -> Bool) -> Cons a -> Bool
-any f = toList >> List.any f
+any f =
+    toList >> List.any f
