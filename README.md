@@ -20,3 +20,7 @@ maximum = foldl1 max
 ```
 
 See [the full documentation](http://package.elm-lang.org/packages/hrldcpr/elm-cons/2.0.0/Cons) for more.
+
+## Contributors
+
+Thanks to Sam Gwilym for adding Elm 0.18 support.
