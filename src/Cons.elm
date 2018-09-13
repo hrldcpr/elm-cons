@@ -1,6 +1,6 @@
 module Cons
     exposing
-        ( Cons
+        ( Cons(..)
         , cons
         , uncons
         , singleton
