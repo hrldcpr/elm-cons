@@ -19,7 +19,7 @@ maximum : Cons comparable -> comparable
 maximum = foldl1 max
 ```
 
-See [the full documentation](http://package.elm-lang.org/packages/hrldcpr/elm-cons/2.0.0/Cons) for more.
+See [the full documentation](http://package.elm-lang.org/packages/hrldcpr/elm-cons/3.0.0/Cons) for more.
 
 ## Contributors
 
