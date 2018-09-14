@@ -156,8 +156,8 @@ cons =
     uncons c == (1, [2, 3])
 -}
 uncons : Cons a -> ( a, List a )
-uncons (Cons head tail) =
-    ( head, tail )
+uncons (Cons first rest) =
+    ( first, rest )
 
 
 {-| A cons containing only the given element.
@@ -176,8 +176,8 @@ singleton x =
     toList c == [1, 2, 3]
 -}
 toList : Cons a -> List a
-toList (Cons head tail) =
-    head :: tail
+toList (Cons first rest) =
+    first :: rest
 
 
 
@@ -190,8 +190,8 @@ toList (Cons head tail) =
     head c == 1
 -}
 head : Cons a -> a
-head (Cons head _) =
-    head
+head (Cons first _) =
+    first
 
 
 {-| The list of all elements after the first element of the cons.
@@ -200,8 +200,8 @@ head (Cons head _) =
     tail c == [2, 3]
 -}
 tail : Cons a -> List a
-tail (Cons _ tail) =
-    tail
+tail (Cons _ rest) =
+    rest
 
 
 {-| The smallest element of the cons.
@@ -239,8 +239,8 @@ maximum =
     foldl1 step c == "abc"
 -}
 foldl1 : (a -> a -> a) -> Cons a -> a
-foldl1 f (Cons head tail) =
-    List.foldl f head tail
+foldl1 f (Cons first rest) =
+    List.foldl f first rest
 
 
 {-| Reduce the cons from the right.
@@ -252,11 +252,11 @@ foldl1 f (Cons head tail) =
 foldr1 : (a -> a -> a) -> Cons a -> a
 foldr1 f c =
     case unconsWithMaybe c of
-        ( head, Nothing ) ->
-            head
+        ( first, Nothing ) ->
+            first
 
-        ( head, Just tail ) ->
-            f head <| foldr1 f tail
+        ( first, Just rest ) ->
+            f first <| foldr1 f rest
 
 
 {-| Reduce the cons from the left, producing a cons of all intermediate results.
@@ -266,8 +266,8 @@ foldr1 f c =
     scanl1 step c == cons "a" ["ab", "abc"]
 -}
 scanl1 : (a -> a -> a) -> Cons a -> Cons a
-scanl1 f (Cons head tail) =
-    scanlList f head tail
+scanl1 f (Cons first rest) =
+    scanlList f first rest
 
 
 
@@ -285,8 +285,8 @@ fromList l =
         [] ->
             Nothing
 
-        head :: tail ->
-            Just <| cons head tail
+        first :: rest ->
+            Just <| cons first rest
 
 
 {-| A cons with the given head and tail.
@@ -298,8 +298,8 @@ fromList l =
     toList d = [1, 2, 3]
 -}
 consWithMaybe : a -> Maybe (Cons a) -> Cons a
-consWithMaybe head tail =
-    cons head <| maybeToList tail
+consWithMaybe first rest =
+    cons first <| maybeToList rest
 
 
 {-| The head and tail of the cons.
@@ -317,8 +317,8 @@ consWithMaybe head tail =
         (first, Just rest) -> max first <| maximum rest
 -}
 unconsWithMaybe : Cons a -> ( a, Maybe (Cons a) )
-unconsWithMaybe (Cons head tail) =
-    ( head, fromList tail )
+unconsWithMaybe (Cons first rest) =
+    ( first, fromList rest )
 
 
 {-| The tail of the cons.
@@ -383,8 +383,8 @@ forList f =
     reverse c == cons 3 [2, 1]
 -}
 reverse : Cons a -> Cons a
-reverse (Cons head tail) =
-    appendToList (List.reverse tail) <| singleton head
+reverse (Cons first rest) =
+    appendToList (List.reverse rest) <| singleton first
 
 
 {-| Append the second cons to the first.
@@ -457,11 +457,11 @@ concat =
 intersperse : a -> Cons a -> Cons a
 intersperse x c =
     case uncons c of
-        ( head, [] ) ->
+        ( first, [] ) ->
             c
 
-        ( head, tail ) ->
-            cons head <| x :: List.intersperse x tail
+        ( first, rest ) ->
+            cons first <| x :: List.intersperse x rest
 
 
 {-| A tuple of each cons, corresponding to a cons of tuples.
@@ -470,10 +470,10 @@ intersperse x c =
     unzip c == (cons 1 [2, 3], cons "a" ["b", "c"])
 -}
 unzip : Cons ( a, b ) -> ( Cons a, Cons b )
-unzip (Cons ( x, y ) tail) =
+unzip (Cons ( x, y ) rest) =
     let
         ( xs, ys ) =
-            List.unzip tail
+            List.unzip rest
     in
         ( cons x xs, cons y ys )
 
@@ -484,8 +484,8 @@ unzip (Cons ( x, y ) tail) =
     map sqrt c == cons 1 [2, 3]
 -}
 map : (a -> b) -> Cons a -> Cons b
-map f (Cons head tail) =
-    cons (f head) <| List.map f tail
+map f (Cons first rest) =
+    cons (f first) <| List.map f rest
 
 
 {-| Apply a function to each pair of elements, limited by the shortest cons.
@@ -542,8 +542,8 @@ concatMap f =
 indexedMap : (Int -> a -> b) -> Cons a -> Cons b
 indexedMap f c =
     let
-        go i c =
-            consWithMaybe (f i <| head c) <| Maybe.map (go (i + 1)) <| maybeTail c
+        go i d =
+            consWithMaybe (f i <| head d) <| Maybe.map (go (i + 1)) <| maybeTail d
     in
         go 0 c
 
@@ -574,8 +574,23 @@ scanlList f x l =
             [] ->
                 []
 
-            head :: tail ->
-                List.scanl f (f head x) tail
+            first :: rest ->
+                listScanl f (f first x) rest
+
+-- copied from https://github.com/elm/core/blob/417a977757fad5c237d568d5b6d88e2616ad7fd9/src/List.elm
+-- (immediately before List.scanl was removed for Elm 0.19)
+listScanl : (a -> b -> b) -> b -> List a -> List b
+listScanl f b xs =
+  let
+    scan1 x accAcc =
+      case accAcc of
+        acc :: _ ->
+          (f x acc) :: accAcc
+
+        [] ->
+          [] -- impossible
+  in
+    List.reverse (List.foldl scan1 [b] xs)
 
 
 {-| Sort the cons in ascending order.
@@ -631,9 +646,9 @@ insortWith f x l =
         [] ->
             singleton x
 
-        head :: tail ->
-            if f x head == GT then
-                cons head <| toList <| insortWith f x tail
+        first :: rest ->
+            if f x first == GT then
+                cons first <| toList <| insortWith f x rest
             else
                 cons x l
 
@@ -683,7 +698,7 @@ filter f =
     toList >> List.filter f
 
 
-{-| The first *n* elements of the cons, up to the length of the cons. This can't generally be a cons itself, since *n* might not be positive.
+{-| The first _n_ elements of the cons, up to the length of the cons. This can't generally be a cons itself, since _n_ might not be positive.
 
     c = cons "a" ["b", "c"]
     take 2 c == ["a", "b"]
@@ -695,7 +710,7 @@ take n =
     toList >> List.take n
 
 
-{-| The cons without its first *n* elements. This can't generally be a cons itself, because it might be empty.
+{-| The cons without its first _n_ elements. This can't generally be a cons itself, because it might be empty.
 
     c = cons "a" ["b", "c"]
     drop 2 c == ["c"]
