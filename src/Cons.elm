@@ -5,6 +5,7 @@ module Cons
         , uncons
         , singleton
         , toList
+        , push
         , head
         , tail
         , minimum
@@ -73,7 +74,7 @@ Using Cons, on the other hand, the type system knows the list will never be empt
 
 # Basics
 
-@docs Cons, cons, uncons, singleton, toList
+@docs Cons, cons, uncons, singleton, toList, push
 
 
 # Avoiding Maybe
@@ -178,6 +179,18 @@ singleton x =
 toList : Cons a -> List a
 toList (Cons first rest) =
     first :: rest
+
+
+{-| A cons with the given head and tail.
+
+Similar to cons, but takes a Cons tail instead of a List.
+
+    c = push 1 <| cons 2 [3]
+    toList c == [1, 2, 3]
+-}
+push : a -> Cons a -> Cons a
+push first rest =
+    Cons first <| toList rest
 
 
 
