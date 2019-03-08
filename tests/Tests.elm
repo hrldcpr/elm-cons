@@ -15,7 +15,7 @@ checkSuite =
         , fuzzEq (tuple ( int, list int )) "uncons is inverse of cons" (uncons << uncurry Cons.cons) identity
         , fuzzEq int "singleton cons agrees with singleton list" (singleton >> toList) (\x -> [ x ])
         , fuzzEq (cons int) "toList agrees with maybeToList" toList (maybeToList << Just)
-        , fuzzEq (tuple ( int, cons int )) "push agrees with cons" (uncurry Cons.push) (\( x, c ) -> Cons.cons x (toList c))
+        , fuzzEq (tuple ( int, cons int )) "push agrees with cons" (uncurry Cons.push) (\( x, c ) -> Cons.cons x <| toList c)
           -- Avoiding Maybe
         , fuzzEq (cons int) "head agrees with List.head" (head >> Just) (List.head << toList)
         , fuzzEq (cons int) "tail agrees with List.tail" (tail >> Just) (List.tail << toList)
