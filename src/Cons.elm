@@ -181,15 +181,16 @@ toList (Cons first rest) =
     first :: rest
 
 
-{-| Add a new element to the cons.
+{-| A cons with the given head and tail.
 
-    c = push 1 (cons 2 [3])
+Similar to cons, but takes a Cons tail instead of a List.
+
+    c = push 1 <| cons 2 [3]
     toList c == [1, 2, 3]
-
 -}
 push : a -> Cons a -> Cons a
-push new (Cons first rest) =
-    Cons new (first :: rest)
+push first rest =
+    Cons first <| toList rest
 
 
 
