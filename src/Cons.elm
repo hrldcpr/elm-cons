@@ -139,7 +139,7 @@ type Cons a
 -- Basics
 
 
-{-| A cons with the given head and tail. Equivalent to ::
+{-| A cons with the given head and tail. Analogous to List's :: operator.
 
     c = cons 1 [2, 3]
     head c == 1
